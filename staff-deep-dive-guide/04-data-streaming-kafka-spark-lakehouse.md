@@ -2,6 +2,8 @@
 
 **Purpose of this doc:** Explain *how* these systems behave under the hood (at the level Staff interviews expect), *why* teams choose one pattern over another, and *what* to say when an interviewer drills past buzzwords.
 
+**Hands-on ops companion:** `04b-kafka-hands-on-ops.md` — CLI, lag, offsets, rebalance/URP runbooks, metrics.
+
 ---
 
 ## 1. The problem class (beginner → Staff)
