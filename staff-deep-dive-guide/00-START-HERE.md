@@ -35,6 +35,7 @@ If a section still feels thin for you, say which **file number** to grow next.
 
 **Cross-reference:** Main plan **Part 10** → [`adtech-beginner-guide`](../adtech-beginner-guide/00-START-HERE.md). **Parts 3–9, 11–14** map to **C–M** above (same content as the big single file, expanded here for learning).
 
+**Data modeling (beginner → advanced):** [`../data-modeling-guide/00-START.md`](../data-modeling-guide/00-START.md)  
 **Spark & batch ETL deep dives:** [`../spark-guide/00-START-HERE.md`](../spark-guide/00-START-HERE.md) · [`../batch-etl-guide/00-START-HERE.md`](../batch-etl-guide/00-START-HERE.md)
 
 ---

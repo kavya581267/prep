@@ -21,6 +21,7 @@ You can treat this as **Ad Tech 101**. No prior industry knowledge is assumed. I
 | 7 | [Forecasting, pacing, yield](./07-forecasting-pacing-yield.md) | Planning inventory, spending smoothly, maximizing value |
 | 8 | [Linear TV terms: avail, pod, makegood, logs](./08-linear-tv-terms-avail-pod-makegood.md) | Traditional TV + how it shows up in jobs like WBD’s |
 | 9 | [Tradeoffs: reach vs frequency, privacy, precision](./09-tradeoffs-reach-frequency-privacy-precision.md) | Business and technical tensions (interview-style) |
+| 10 | [Programmatic flow: app → identity → bid → auction → serve → feedback](./10-programmatic-request-to-feedback-flow.md) | End-to-end real path with examples (CTV, mobile, web) |
 
 ## How this ties to system design interviews
 

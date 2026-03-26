@@ -6,12 +6,14 @@
 
 **Monthly uptime % → allowed downtime:**
 
+
 | SLO    | Approx max downtime / month |
-|--------|-----------------------------|
-| 99%    | ~7h 18m |
-| 99.9%  | ~43m |
-| 99.95% | ~21m |
-| 99.99% | ~4m 20s |
+| ------ | --------------------------- |
+| 99%    | ~7h 18m                     |
+| 99.9%  | ~43m                        |
+| 99.95% | ~21m                        |
+| 99.99% | ~4m 20s                     |
+
 
 **Staff:** Connect **composite** SLO to components: if decision API depends serially on **A** and **B**, **worst-case** availability multiplies (roughly). You **cannot** chain five **99.9%** dependencies naively and claim **99.9%** for the path without **parallelism** and **fallbacks**.
 
@@ -170,3 +172,4 @@ At **100k** QPS you **cannot** store **all** traces.
 
 - Patterns expanded: [13](./13-resilience-patterns-catalog.md)  
 - OE stories: [08](./08-operational-engineering-excellence.md)
+
