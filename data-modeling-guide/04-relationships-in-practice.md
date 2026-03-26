@@ -211,10 +211,126 @@ Watch **cycles**, **depth limits**, and **path** queries—may need **closure ta
 
 ---
 
-## 4.7 What you should be able to say
+## 4.7 Worked example — same data through three query shapes
+
+**Setup (abbreviated DDL):**
+
+```sql
+CREATE TABLE customers (id uuid PRIMARY KEY, email text NOT NULL);
+CREATE TABLE orders (
+  id uuid PRIMARY KEY,
+  customer_id uuid NOT NULL REFERENCES customers(id),
+  placed_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE products (id uuid PRIMARY KEY, title text NOT NULL);
+CREATE TABLE order_lines (
+  id uuid PRIMARY KEY,
+  order_id uuid NOT NULL REFERENCES orders(id),
+  product_id uuid NOT NULL REFERENCES products(id),
+  qty int NOT NULL
+);
+
+CREATE TABLE student (id uuid PRIMARY KEY, name text NOT NULL);
+CREATE TABLE course (id uuid PRIMARY KEY, title text NOT NULL);
+CREATE TABLE enrollment (
+  student_id uuid NOT NULL REFERENCES student(id),
+  course_id uuid NOT NULL REFERENCES course(id),
+  enrolled_at date NOT NULL,
+  PRIMARY KEY (student_id, course_id)
+);
+```
+
+**1:N — “All orders for customer `c1`”**
+
+```sql
+SELECT o.id, o.placed_at
+FROM orders o
+WHERE o.customer_id = 'c1';
+```
+
+**M:N — “All students in course `DB201`”** (junction in the middle)
+
+```sql
+SELECT s.name
+FROM enrollment e
+JOIN student s ON s.id = e.student_id
+WHERE e.course_id = (SELECT id FROM course WHERE title = 'Databases 201');
+```
+
+**1:1 — “Get user + PII in one row”** (two-table split, `user_pii.user_id` is PK)
+
+```sql
+SELECT u.email, p.legal_name
+FROM users u
+LEFT JOIN user_pii p ON p.user_id = u.id
+WHERE u.id = '…';
+```
+
+`LEFT JOIN` because **optional** extension row; if **mandatory**, `INNER JOIN`.
+
+---
+
+## 4.8 Ternary and N-ary relationships (beyond binary M:N)
+
+Sometimes the **link** involves **three** entities: “**student** takes **course** in **semester**.”
+
+**Bad:** Two separate junctions student–course and course–semester lose **which** semester that enrollment was in.
+
+**Good:** One **3-column junction** with **`PRIMARY KEY (student_id, course_id, semester_id)`** and dates or grades on that row.
+
+**Rule:** N distinct entities in one association ⇒ junction with **N FKs** + **PK/unique** on the full tuple (unless surrogate).
+
+---
+
+## 4.9 Ordered 1:N (line sequence)
+
+`order_lines` often need **`line_no` SMALLINT** within the order: **`UNIQUE(order_id, line_no)`**. Display order ≠ insert order—**never** rely on `id` sort.
+
+---
+
+## 4.10 Shared primary key (identifying 1:1)
+
+`user_pii.user_id` **PK** **and** **FK** to `users(id)` guarantees **at most one** PII row and **same** id space—nice for **join-free** “give me pii where user id = X” (`SELECT * FROM user_pii WHERE user_id = $1`).
+
+---
+
+## 4.11 Org chart — adjacency list vs closure table
+
+**Adjacency** (`employees.manager_id`): easy to maintain; **tree** queries need **recursive CTE** (depth N).
+
+```sql
+WITH RECURSIVE down AS (
+  SELECT id, manager_id, 1 AS depth FROM employees WHERE id = :root
+  UNION ALL
+  SELECT e.id, e.manager_id, d.depth + 1
+  FROM employees e JOIN down d ON e.manager_id = d.id
+)
+SELECT * FROM down;
+```
+
+**Closure table** `employee_tree (ancestor_id, descendant_id, depth)` — more **writes** on reorg; **O(1)** “all reports.” Pick based on **read/write ratio** and **reorg frequency**.
+
+---
+
+## 4.12 Polymorphic — when you still use it (mitigations)
+
+If `comments (target_type, target_id)` is required:
+
+```sql
+CHECK (target_type IN ('post', 'photo'));
+CREATE INDEX comments_post ON comments (target_id) WHERE target_type = 'post';
+CREATE INDEX comments_photo ON comments (target_id) WHERE target_type = 'photo';
+```
+
+**App tests:** every insert matches **existing** row in `posts` or `photos` (trigger or **verified** in service layer). Document **orphan** cleanup job.
+
+---
+
+## 4.13 What you should be able to say
 
 - “**1:N** needs **two** tables minimum; **M:N** needs **three** (two entities + junction); **1:1** is **one merged table** or **two** with **UNIQUE** on the FK.”  
 - “**M:N** always gets a **junction** in relational OLTP unless I collapse into documents with clear bounds.”  
-- “**Polymorphic** FKs are a **last resort**; I’d prefer explicit tables or **event-first** modeling.”
+- “**Polymorphic** FKs are a **last resort**; I’d prefer explicit tables or **event-first** modeling.”  
+- “**Ternary** links get a **triple** FK junction; **ordered** children get **`UNIQUE(parent, line_no)`**.”
 
 **Next:** [OLTP vs OLAP](./05-oltp-vs-olap.md).
